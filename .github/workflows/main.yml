@@ -5,15 +5,17 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install tools
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential git python3
-      - name: Setup Pico SDK inside repo
+      - name: Setup Pico SDK
         run: |
           rm -rf pico-sdk
-          git clone --depth 1 --branch 2.1.1 https://github.com pico-sdk
-          cd pico-sdk && git submodule update --init --depth 1
+          git clone --branch 2.1.1 https://github.com pico-sdk
+          cd pico-sdk && git submodule update --init
       - name: Build Firmware
         run: |
           mkdir -p build
