@@ -2,20 +2,22 @@ name: Build DSpico Firmware
 on: [push, workflow_dispatch]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: true
       - name: Install tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential git
+          sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential git python3
       - name: Setup Pico SDK
         run: |
           git clone --depth 1 --branch 2.1.1 https://github.com ../pico-sdk
-          git -C ../pico-sdk submodule update --init
+          cd ../pico-sdk && git submodule update --init --depth 1
       - name: Build Firmware
+        env:
+          PICO_SDK_PATH: ${{ github.workspace }}/../pico-sdk
         run: |
           chmod +x compile.sh
           ./compile.sh
@@ -23,4 +25,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DSpico-Pokemon-Platinum
-          path: build/DSpico.uf2
+          path: build/*.uf2
