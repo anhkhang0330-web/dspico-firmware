@@ -14,13 +14,15 @@ jobs:
       - name: Setup Pico SDK
         run: |
           rm -rf pico-sdk
-          git clone --branch 2.1.1 https://github.com pico-sdk
-          cd pico-sdk && git submodule update --init
+          git clone --branch 2.1.1 https://github.com/raspberrypi/pico-sdk.git
+          cd pico-sdk
+          git submodule update --init
       - name: Build Firmware
         run: |
           mkdir -p build
-          PICO_SDK_PATH=$PWD/pico-sdk CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -B build/ .
-          cmake --build build -j$(nproc)
+          export PICO_SDK_PATH=$PWD/pico-sdk
+          cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POLICY_VERSION_MINIMUM=3.5 .
+          cmake --build build -j4
       - name: Upload UF2
         uses: actions/upload-artifact@v4
         with:
