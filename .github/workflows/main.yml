@@ -5,22 +5,20 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
       - name: Install tools
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential git python3
-      - name: Setup Pico SDK
+      - name: Setup Pico SDK inside repo
         run: |
-          git clone --depth 1 --branch 2.1.1 https://github.com ../pico-sdk
-          cd ../pico-sdk && git submodule update --init --depth 1
+          rm -rf pico-sdk
+          git clone --depth 1 --branch 2.1.1 https://github.com pico-sdk
+          cd pico-sdk && git submodule update --init --depth 1
       - name: Build Firmware
-        env:
-          PICO_SDK_PATH: ${{ github.workspace }}/../pico-sdk
         run: |
-          chmod +x compile.sh
-          ./compile.sh
+          mkdir -p build
+          PICO_SDK_PATH=$PWD/pico-sdk CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -B build/ .
+          cmake --build build -j$(nproc)
       - name: Upload UF2
         uses: actions/upload-artifact@v4
         with:
